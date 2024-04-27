@@ -176,7 +176,67 @@ Burada stepDefinitions satirinin sonuna virgul koyup asagida yer alan komutu yaz
   kolaylastirabiliriz. Senarolara tag'i senaryonun bas tarafina @tagIsmi seklinde yazarak veriyoruz. Ya da ayni islemi
   Feature'in hemen ustune ayni sakilde bir yazim ile feature dosyalari icin yapabiliriz. Istenirse ikinci bir tag daha 
   eklenebiliyor.
-  Testleri kosmak icin npx cypress run -e TAGS='@smoke' seklinde komut yazmak gerekiyor. Bu yazim ile smoke tag'ine 
-  sahip testler kosmus oluyor.
-  
-  
+  Testleri kosmak icin npx cypress run -e tags='@smoke' seklinde komut yazmak gerekiyor. Bu yazim ile smoke tag'ine 
+  sahip testler kosmus oluyor. Tag'lerle calisirken and or not gibi eklemelerle daha kompleks kosumlar yapabiliyoruz.
+==>Tag'lerle script eklemek:
+  npx cypress run -e tags='@smoke' seklinde olusturdugumuz komutu package json dosyasinda bulunan scripts bolumune
+  ekleyerek ilgili script uzerinden de testlerimizi calistirabiliriz. Scripts bolumune smokeTests ismi ile ekledigimizi
+  varsayarsak script uzerinden calistirabilmek icin npm run smokeTests komutu ile bu script'te yer alan testleri 
+  calistirabiliriz. Fakat burada dikkat edilmesi gereken bir durum var. Scripts icerisinde ' ' kullanamiyoruz. En dista zaten 
+  " kullandigimiz icin icerde tekrar " kullanmak da mumkun olmuyor bunu asmak icin icerde kullandigimiz " tan hemen 
+  once \ isaretini ekleyiyoruz.
+==>Hooks;
+  before, beforeEach, after, afterEach gibi hooks lari cucumber ile de kullanabiliyoruz. Bunlari ilgili class icerisinde 
+  kullanabilecegimiz gibi hooks lar icin ayri bir dosya da oluturabiliriz. Bu dosyayi step definitions icerisinde js 
+  dosya turunde olusturuyoruz. Burada belki su hususa dikkat etmek faydali olabilir. Step definitions icerisinde olusturdugumuz dosyadaki
+  hooks lar herhangi baska bir islem yapilmadan dogrudan tum testlerden once ve sonra otomatik olarak calismis oluyor.
+  -->Hooks larin tag'ler ile birlikte kullanimi;
+    Before({tags:"@smoke"} , ()=>{
+    cy.log('Her testten once calisir')
+    })
+    seklinde kullandigimiz zaman olusturulan Before blogu @smoke tag'ine sahip olan her testten once calismis olacak.
+  Dikkat edilmesi gereken bir diger nokta ise cypress teki before ile buradaki before un birbirinden farkli oldugudur. Soyle ki cypress'teki Before
+  butun testlerden once bir kere calistiriliyordu. Burada ise tipki cypress teki beforeEach te oldugu gibi herbir testen once calisiyor.
+==>Page-Object-Model(POM); support klasorunun altinda step definitions klasoru gibi pages adinda bir klasor daha olusturup locate'leri burada
+  saklayabiliriz. Fakt POM'daki burada tekrar method olusturmaya gerek olmayabilir. Cunku methodlarimizi zaten stepDefinitions icerisinde 
+  moduler bir sekilde olusturuyoruz.
+==>Raporlama; 
+  Eger istersek baskaca bir plugin eklemeden cucumber'in kendine ait raporlamasini kullanabiliriz. Bunun icin bazi duzenlemeler yapmamiz gerek.
+  package json dosyasi icerisindeki cypress-cucumber-preprocessor bolumunun icerisinde 
+    "html": {
+      "enabled": true,
+      "output": "cypress/reports/cucumber-html/cucumber-report.html"
+    }
+    gibi bir ekleme yapiyoruz. En bastaki html ifadesi html raporu olusturma istedigimizi belirtiyor. Cunlu ayni zamanda
+    json raporu da alabiliyoruz. ebale :true ifadesi ile raporun olusturulmasi saglaniyor. 
+    output ile raporun nerede olusturulmasini istedigimizi soyluyoruz.
+  -->Json rapor; 
+    Oncelikle json data turunde bir rapor olusturabilmek icin json formatter'e ihtiyacimiz var bunun icin su siteye
+    gidiyoruz; https://github.com/cucumber/json-formatter 
+    Bu sayfada degisik isletim sistemleri icin gerekli olan kurulum adimlari aciklaniyor. Burada windows icin gerekli 
+    olan dosyayi ustte belirtilen github sayfasindan indirdik. Daha sonra bilgisayardaki kullanicilar klasoru icerisine
+    cucumber-json-formatter adinda bir klasor olusturarak indirdigimiz dosyayi buraya yapistirdik. Daha sonra indirdigimiz 
+    dosyanin ismini cucumber-json-formattet.exe olarak degistirdik. Bu asamdan sonra once adini degistirdigimiz bu 
+    dosyanin path'ini aldik. Bilgisayarin arama kismini les variables d'environnement(ortam degiskenleri) yazdik. Actigimiz
+    pencerede variables environnement(sistem degiskenleri) butonuna tikladik. Burada variables utilisateur ve variables
+    système pencerelerinden variables système penceeresinin icindeki path'i bulduk ve daha sonra alttaki modifier 
+    butonuna tikladik ve acilan penceredeki bos bir satira cift tiklayarak daha once kopyaladigimiz dosya yolunu buraya
+    yapistirdik. Burada yaptigimiz ayarlamalar jenkins kullaniminda da ihtiyacimiz olan ayarlamalar. 
+    Bu asamalari gerceklestirdikten sonra package.json dosyasinda html raporunda yaptigimiza benzer sekilde su ayarlamalari
+    yaptik:
+      "json": {
+      "enabled": true,
+      "fomatter":"cucumber-json-formatter",
+      "output": "cypress/reports/cucumber-json/cucumber-report.json"
+    } 
+    Boylece reports klasoru altinda cucumber-json isminde bir klasor daha olustu ve test kosumundan sonra olusturulan json dosyasi otomatik
+    olarak bu klasore eklenmis oldu. Biz bu dosyayi jenkinsle birlikte kullanmak istiyoruz. Fakat dogrudan bu dosyayi rapora donusturmek 
+    isteseydik multiple cucumber HTML reporter'i kurmamiz gerekecekti.
+==>Jenkins; 
+  jenkins sadece java 11 ya da java 17 ile calistigi icin pc'de bu ikisinden birisinin kurulu olmasi gerek. Biraz once actigimiz les variables 
+  système kismini acip les variables système'i tikladigimda hocada JAVA_HOME adinda bir degisken oldugunu fakat bende olmadigini fark ettim.
+  Aslinda bende de jdk-17 yuklu idi. Anladigim kadari ile buradaki JAVA_HOME degiskenin adresi olarak hangi jdk surumu verilirse o versiyonu
+  kulanmis oluyoruz. Yani pc de birden fazla jdk surumu ayni anda yuklu olsa, hangi jdk surumunu kullanmak istiyorsak ilgili dosyanin path'ini
+  JAVA_HOME degikenin degeri olarak atayarak istedigimiz jdk surumu ile calisabiliriz. Bu sebeple JAVA_HOME degiskenini manuel olarak olusturdum
+  ve su an icin jdk-17'nin dosya yolunu verdim. Yine java surumunu kontrol etmek icin cmd'ye java -version komutunu da yazabiliriz.
+   

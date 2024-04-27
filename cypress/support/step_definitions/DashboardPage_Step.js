@@ -1,4 +1,4 @@
-const { Then } = require("@badeball/cypress-cucumber-preprocessor");
+const { Then, } = require("@badeball/cypress-cucumber-preprocessor");
 
 Then('Dashboard sayfasinin acildigini dogrularim', ()=>{
     cy.get('[data-test="page-title"]').should('have.text','Sales over the years');

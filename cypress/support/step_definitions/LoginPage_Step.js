@@ -1,15 +1,16 @@
 const { When,Given, Then } = require("@badeball/cypress-cucumber-preprocessor");
+const { login } = require("../pages/loginPage_POM");
 
 When('Kullanici Email alanina email yazar', ()=>{
-    cy.get('#email').type('admin@practicesoftwaretesting.com');
+    cy.get(login.emailBox).type('admin@practicesoftwaretesting.com');
 })
 
 When('Kullanici Password alanina password yazar', ()=>{
-    cy.get('#password').type('welcome01');
+    cy.get(login.passwordBox).type('welcome01');
 })
 
 When('Kullanici login butonuna tiklar', ()=>{
-    cy.get('[data-test="login-submit"]').click();
+    cy.get(login.loginButton).click();
 })
 
 When('Kullanici email alanini bos birakir', ()=>{

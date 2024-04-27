@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "smokeTests":"npx cypress run -e tags=\"@smoke\"",
+    "regressionTests":"npx cypress run -e tags=\"@regression\""
   },
   "author": "Sezer Ozkan",
   "license": "ISC",
@@ -15,6 +17,15 @@
     "ts-loader": "^9.5.1"
   },
   "cypress-cucumber-preprocessor": {
-    "stepDefinitions": "cypress/support/step_definitions/**/*.js"
+    "stepDefinitions": "cypress/support/step_definitions/**/*.js",
+    "html": {
+      "enabled": true,
+      "output": "cypress/reports/cucumber-html/cucumber-report.html"
+    },
+    "json": {
+      "enabled": true,
+      "fomatter":"cucumber-json-formatter",
+      "output": "cypress/reports/cucumber-json/cucumber-report.json"
+    }
   }
 }
